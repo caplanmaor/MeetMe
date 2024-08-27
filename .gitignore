@@ -1,0 +1,50 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+env/
+venv/
+.venv/
+
+# FastAPI (Python) dependencies
+# Ignore virtual environment folders
+venv/
+.env/
+.Python
+env/
+env.bak/
+.env.bak/
+
+# React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+*.lock
+
+# Ignore build output directories
+build/
+dist/
+out/
+*.html
+
+# Ignore environment variable files
+.env
+.env.local
+.env.*.local
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore Docker and related files
+docker-compose.override.yml
