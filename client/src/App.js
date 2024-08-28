@@ -9,20 +9,33 @@ function App() {
   const [userID, setUserID] = useState("");
   const [username, setUsername] = useState("");
 
-  // if the user is already logged in, set the user details from the token
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const decodedToken = jwtDecode(token);
-      setUserID(decodedToken.user_id);
-      setUsername(decodedToken.sub);
-      setIsAuthenticated(true);
+      try {
+        const decodedToken = jwtDecode(token);
+
+        // check token expiration
+        if (decodedToken.exp * 1000 < Date.now()) {
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+        } else {
+          setUserID(decodedToken.user_id);
+          setUsername(decodedToken.sub);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error("Invalid token:", error);
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+      }
     }
   }, []);
 
-  // if the user needs to log in, set the user name from the login form
-  const handleLogin = (username) => {
-    setUsername(username);
+  const handleLogin = (userData) => {
+    console.log("User data:", userData);
+    setUsername(userData.user_name);
+    setUserID(userData.user_id);
     setIsAuthenticated(true);
   };
 

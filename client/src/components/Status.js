@@ -45,6 +45,7 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
         console.error("Failed to fetch statuses:", response.status);
       }
     };
+
     fetchInitialStatuses();
 
     const websocket = new WebSocket("ws://localhost:8000/ws");

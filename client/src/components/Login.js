@@ -24,7 +24,7 @@ const Login = ({ onLogin }) => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem("token", data.access_token);
-        onLogin(data.user_name);
+        onLogin(data);
       } else {
         setError("Invalid username or password");
       }
