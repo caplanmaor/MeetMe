@@ -31,6 +31,8 @@ const Status = ({ userID, setIsAuthenticated }) => {
 
       if (response.ok) {
         const data = await response.json();
+        // Sort statuses by username
+        data.sort((a, b) => a.username.localeCompare(b.username));
         setStatuses(data);
         const user = data.find((s) => s.user_id === userID);
         if (user) {
