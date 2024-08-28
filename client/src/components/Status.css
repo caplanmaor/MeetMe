@@ -1,0 +1,43 @@
+.status-container {
+  width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#update-status-row {
+  display: flex;
+  gap: 10px;
+}
+
+.status-container .MuiTextField-root {
+  width: 100%;
+}
+
+/* .status-container .MuiButton-root {
+  height: 50%;
+} */
+
+.status-container .MuiList-root {
+  background-color: white;
+  border-radius: 5px;
+}
+
+.status-container .MuiTypography-root {
+  font-size: 16px;
+  color: #333;
+}
+
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.filter-section .MuiFormControl-root {
+  flex: 1;
+}
