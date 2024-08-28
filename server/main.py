@@ -110,7 +110,7 @@ async def update_status(user_id: int, status: str, current_user: dict = Depends(
     await database.execute(update_query)
     
     # broadcast the new status to all connected websocket clients
-    update_message = json.dumps({"user_id": user_id, "status": status})
+    update_message = json.dumps({"user_id": user_id, "status": status, "username": current_user["username"]})
     await manager.broadcast(update_message)
 
 def verify_password(plain_password, hashed_password):
