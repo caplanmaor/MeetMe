@@ -12,13 +12,12 @@ import {
 } from "@mui/material";
 import "./Status.css";
 
-const Status = ({ userID, setIsAuthenticated }) => {
+const Status = ({ username, userID, setIsAuthenticated }) => {
   const [statusSelection, setStatusSelection] = useState("");
   const [statuses, setStatuses] = useState([]);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
-  const [username, setUsername] = useState("");
-  const [userPrevStatus, setUserPrevStatus] = useState("");
+  const [userPrevStatus, setUserPrevStatus] = useState("Not Specified");
 
   useEffect(() => {
     const fetchInitialStatuses = async () => {
@@ -31,13 +30,12 @@ const Status = ({ userID, setIsAuthenticated }) => {
 
       if (response.ok) {
         const data = await response.json();
-        // Sort statuses by username
         data.sort((a, b) => a.username.localeCompare(b.username));
         setStatuses(data);
-        const user = data.find((s) => s.user_id === userID);
-        if (user) {
-          setUsername(user.username);
-          setUserPrevStatus(user.status);
+
+        const prevStatus = data.find((s) => s.user_id === userID);
+        if (prevStatus) {
+          setUserPrevStatus(prevStatus.status);
         }
       } else if (response.status === 401) {
         console.error("Unauthorized access");
@@ -50,43 +48,17 @@ const Status = ({ userID, setIsAuthenticated }) => {
     fetchInitialStatuses();
 
     const websocket = new WebSocket("ws://localhost:8000/ws");
-
-    websocket.onopen = () => {
-      console.log("WebSocket connection established");
-    };
-
     websocket.onmessage = (event) => {
       const newStatus = JSON.parse(event.data);
-      console.log("New status received:", newStatus);
-      // Update the statuses array with the new status
+
       setStatuses((prevStatuses) => {
-        const newStatuses = prevStatuses.map((status) => {
-          if (status.user_id === newStatus.user_id) {
-            return {
-              ...status,
-              status: newStatus.status,
-            };
-          }
-          return status;
-        });
-        return newStatuses;
+        const filteredStatuses = prevStatuses.filter(
+          (s) => s.user_id !== newStatus.user_id
+        );
+        const updatedStatuses = [...filteredStatuses, newStatus];
+        updatedStatuses.sort((a, b) => a.username.localeCompare(b.username));
+        return updatedStatuses;
       });
-      // update the user's previous status if it's the current user
-      if (newStatus.user_id === userID) {
-        setUserPrevStatus(newStatus.status);
-      }
-    };
-
-    websocket.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
-
-    websocket.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
-
-    return () => {
-      websocket.close();
     };
   }, []);
 
@@ -103,6 +75,7 @@ const Status = ({ userID, setIsAuthenticated }) => {
         },
       }
     );
+    setUserPrevStatus(status);
   };
 
   const getStatusColor = (status) => {
@@ -123,7 +96,7 @@ const Status = ({ userID, setIsAuthenticated }) => {
   return (
     <div className="status-container">
       <Typography variant="h6">
-        Hello {username}, your current status is {userPrevStatus}
+        Hello {username}, your current status is: {userPrevStatus}
       </Typography>
       <FormControl fullWidth margin="normal">
         <InputLabel id="status-label">Update Work Status</InputLabel>
