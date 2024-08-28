@@ -11,19 +11,39 @@ import {
 } from "@mui/material";
 import "./Status.css";
 
-const Status = () => {
+const Status = ({ userID, setIsAuthenticated }) => {
   const [statusSelection, setStatusSelection] = useState("");
   const [statuses, setStatuses] = useState([]);
   const [filter, setFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [username, setUsername] = useState("");
+  const [userPrevStatus, setUserPrevStatus] = useState("");
 
   useEffect(() => {
     const fetchInitialStatuses = async () => {
-      const response = await fetch("http://localhost:8000/initial_statuses/");
-      const data = await response.json();
-      setStatuses(data);
-    };
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:8000/initial_statuses/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        setStatuses(data);
+        const user = data.find((s) => s.user_id === userID);
+        if (user) {
+          setUsername(user.username);
+          setUserPrevStatus(user.status);
+        }
+      } else if (response.status === 401) {
+        console.error("Unauthorized access");
+        localStorage.removeItem("token");
+        setIsAuthenticated(false);
+      } else {
+        console.error("Failed to fetch statuses:", response.status);
+      }
+    };
     fetchInitialStatuses();
 
     const websocket = new WebSocket("ws://localhost:8000/ws");
@@ -34,11 +54,24 @@ const Status = () => {
 
     websocket.onmessage = (event) => {
       const newStatus = JSON.parse(event.data);
-      setStatuses((prevStatuses) =>
-        prevStatuses
-          .filter((s) => s.user_id !== newStatus.user_id)
-          .concat(newStatus)
-      );
+      console.log("New status received:", newStatus);
+      // Update the statuses array with the new status
+      setStatuses((prevStatuses) => {
+        const newStatuses = prevStatuses.map((status) => {
+          if (status.user_id === newStatus.user_id) {
+            return {
+              ...status,
+              status: newStatus.status,
+            };
+          }
+          return status;
+        });
+        return newStatuses;
+      });
+      // update the user's previous status if it's the current user
+      if (newStatus.user_id === userID) {
+        setUserPrevStatus(newStatus.status);
+      }
     };
 
     websocket.onerror = (error) => {
@@ -55,15 +88,15 @@ const Status = () => {
   }, []);
 
   const updateStatusInDB = async (status) => {
-    // TODO: get the current user_id
-    const user_id = 1;
+    const token = localStorage.getItem("token");
 
     await fetch(
-      `http://localhost:8000/update_status/?user_id=${user_id}&status=${status}`,
+      `http://localhost:8000/update_status/?user_id=${userID}&status=${status}`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -87,10 +120,8 @@ const Status = () => {
   return (
     <div className="status-container">
       <Typography variant="h6">
-        Hello USER NAME, your current status is {statusSelection}
+        Hello {username}, your current status is {userPrevStatus}
       </Typography>
-      {/* TODO: display the initial status not the current status, use the statuses */}
-      {/* TODO: replace USER NAME with auth user */}
       <FormControl fullWidth margin="normal">
         <InputLabel id="status-label">Update Work Status</InputLabel>
         <Select
@@ -137,13 +168,21 @@ const Status = () => {
       <List>
         {statuses
           .filter((s) => s.status.includes(filter))
-          .filter((s) => s.user_id.toString().includes(search))
+          .filter((s) =>
+            s.username.toLowerCase().includes(search.toLowerCase())
+          )
           .map((status, index) => (
-            <ListItem
-              key={index}
-              style={{ backgroundColor: getStatusColor(status.status) }}
-            >
-              <Typography>{`User ${status.user_id}: ${status.status}`}</Typography>
+            <ListItem key={index}>
+              <div
+                style={{
+                  backgroundColor: getStatusColor(status.status),
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  marginRight: "10px",
+                }}
+              ></div>
+              <Typography>{`${status.username}: ${status.status}`}</Typography>
             </ListItem>
           ))}
       </List>

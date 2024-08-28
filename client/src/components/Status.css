@@ -16,12 +16,7 @@
   width: 100%;
 }
 
-/* .status-container .MuiButton-root {
-  height: 50%;
-} */
-
 .status-container .MuiList-root {
-  background-color: white;
   border-radius: 5px;
 }
 
@@ -35,9 +30,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .filter-section .MuiFormControl-root {
   flex: 1;
+}
+
+.status-container .MuiListItem-root {
+  display: flex;
+  align-items: center;
 }
