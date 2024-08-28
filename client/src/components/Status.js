@@ -8,6 +8,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Button,
 } from "@mui/material";
 import "./Status.css";
 
@@ -186,6 +187,16 @@ const Status = ({ userID, setIsAuthenticated }) => {
             </ListItem>
           ))}
       </List>
+      <Button
+        variant="contained"
+        color="warning"
+        onClick={() => {
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+        }}
+      >
+        Logout
+      </Button>
     </div>
   );
 };
