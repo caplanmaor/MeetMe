@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Status from "./components/Status";
+import Login from "./components/Login";
 import { jwtDecode } from "jwt-decode";
 import "./App.css";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userID, setUserID] = useState("");
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -14,9 +16,19 @@ function App() {
       setIsAuthenticated(true);
     }
   }, []);
+
+  const handleLogin = (userID) => {
+    setIsAuthenticated(true);
+    setUserID(userID);
+  };
+
   return (
     <div className="App">
-      <Status />
+      {isAuthenticated ? (
+        <Status userID={userID} setIsAuthenticated={setIsAuthenticated} />
+      ) : (
+        <Login onLogin={handleLogin} />
+      )}
     </div>
   );
 }
