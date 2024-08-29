@@ -40,6 +40,7 @@ function App() {
 
   return (
     <div className="App">
+      <h1>MeetMe 📖</h1>
       {isAuthenticated ? (
         <Status
           username={username}
