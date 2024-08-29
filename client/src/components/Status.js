@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import "./Status.css";
 
-const Status = ({ username, userID, setIsAuthenticated }) => {
+const Status = ({ username, userID, onLogout }) => {
   const [statusSelection, setStatusSelection] = useState("");
   const [statuses, setStatuses] = useState([]);
   const [filter, setFilter] = useState("");
@@ -39,8 +39,7 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
         }
       } else if (response.status === 401) {
         console.error("Unauthorized access");
-        localStorage.removeItem("token");
-        setIsAuthenticated(false);
+        onLogout();
       } else {
         console.error("Failed to fetch statuses:", response.status);
       }
@@ -64,7 +63,7 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
         return updatedStatuses;
       });
     };
-  }, [userID, setIsAuthenticated]);
+  }, [userID, onLogout]);
 
   const updateStatusInDB = async (status) => {
     const token = localStorage.getItem("token");
@@ -81,8 +80,7 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
     );
     if (response.status === 401) {
       console.error("Unauthorized access");
-      localStorage.removeItem("token");
-      setIsAuthenticated(false);
+      onLogout();
     }
     setUserPrevStatus(status);
   };
@@ -171,14 +169,7 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
             </ListItem>
           ))}
       </List>
-      <Button
-        variant="contained"
-        color="warning"
-        onClick={() => {
-          localStorage.removeItem("token");
-          setIsAuthenticated(false);
-        }}
-      >
+      <Button variant="contained" color="warning" onClick={onLogout}>
         Logout
       </Button>
     </div>
