@@ -9,7 +9,7 @@ import {
   InputLabel,
   MenuItem,
 } from "@mui/material";
-import { getStatusColor } from "./Helpers";
+import { getStatusColor } from "./Colors";
 
 const StatusList = ({ statuses, filter, setFilter, search, setSearch }) => {
   return (
