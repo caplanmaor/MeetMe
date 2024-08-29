@@ -31,7 +31,6 @@ yarn-error.log*
 build/
 dist/
 out/
-*.html
 
 # Ignore environment variable files
 .env
