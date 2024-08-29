@@ -10,6 +10,8 @@ import {
   InputLabel,
   Button,
 } from "@mui/material";
+import { fetchInitialStatuses, updateStatusInDB } from "./Requests";
+import { getStatusColor } from "./Helpers";
 import "./Status.css";
 
 const Status = ({ username, userID, onLogout }) => {
@@ -20,32 +22,25 @@ const Status = ({ username, userID, onLogout }) => {
   const [userPrevStatus, setUserPrevStatus] = useState("Not Specified");
 
   useEffect(() => {
-    const fetchInitialStatuses = async () => {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:8000/initial_statuses/", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        data.sort((a, b) => a.username.localeCompare(b.username));
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const data = await fetchInitialStatuses(token);
         setStatuses(data);
 
         const prevStatus = data.find((s) => s.user_id === userID);
         if (prevStatus) {
           setUserPrevStatus(prevStatus.status);
         }
-      } else if (response.status === 401) {
-        console.error("Unauthorized access");
-        onLogout();
-      } else {
-        console.error("Failed to fetch statuses:", response.status);
+      } catch (error) {
+        console.error(error.message);
+        if (error.message === "Unauthorized access") {
+          onLogout();
+        }
       }
     };
 
-    fetchInitialStatuses();
+    fetchData();
 
     const websocket = new WebSocket(
       `ws://localhost:8000/ws?token=${localStorage.getItem("token")}`
@@ -63,40 +58,19 @@ const Status = ({ username, userID, onLogout }) => {
         return updatedStatuses;
       });
     };
-  }, [userID, onLogout]);
+    // eslint-disable-next-line
+  }, []);
 
-  const updateStatusInDB = async (status) => {
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(
-      `http://localhost:8000/update_status/?user_id=${userID}&status=${status}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+  const handleStatusChange = async (status) => {
+    try {
+      const token = localStorage.getItem("token");
+      await updateStatusInDB(userID, status, token);
+      setUserPrevStatus(status);
+    } catch (error) {
+      console.error(error.message);
+      if (error.message === "Unauthorized access") {
+        onLogout();
       }
-    );
-    if (response.status === 401) {
-      console.error("Unauthorized access");
-      onLogout();
-    }
-    setUserPrevStatus(status);
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Working":
-        return "#03c03c";
-      case "Working Remotely":
-        return "#77dd77";
-      case "On Vacation":
-        return "#cfcfc4";
-      case "Business Trip":
-        return "#aec6cf";
-      default:
-        return "#000000";
     }
   };
 
@@ -112,7 +86,7 @@ const Status = ({ username, userID, onLogout }) => {
           value={statusSelection}
           onChange={(e) => {
             setStatusSelection(e.target.value);
-            updateStatusInDB(e.target.value);
+            handleStatusChange(e.target.value);
           }}
           variant="filled"
         >

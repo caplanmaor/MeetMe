@@ -1,6 +1,6 @@
 import React from "react";
-import Status from "./components/Status";
-import Login from "./components/Login";
+import Status from "./components/Status/Status";
+import Login from "./components/Login/Login";
 import { useAuth } from "./hooks/useAuth";
 import "./App.css";
 
