@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from "react";
 import {
-  TextField,
-  List,
-  ListItem,
-  Typography,
-  MenuItem,
-  Select,
   FormControl,
   InputLabel,
+  MenuItem,
+  Select,
+  Typography,
   Button,
 } from "@mui/material";
 import {
@@ -15,7 +12,7 @@ import {
   updateStatusInDB,
   setupWebSocket,
 } from "./Requests";
-import { getStatusColor } from "./Helpers";
+import StatusList from "./StatusList";
 import "./Status.css";
 
 const Status = ({ username, userID, onLogout }) => {
@@ -98,52 +95,14 @@ const Status = ({ username, userID, onLogout }) => {
         </Select>
       </FormControl>
 
-      <div className="filter-section">
-        <TextField
-          label="Search by name"
-          variant="filled"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          fullWidth
-        />
-        <FormControl fullWidth>
-          <InputLabel id="filter-label">Filter By Status</InputLabel>
-          <Select
-            labelId="filter-label"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            variant="filled"
-          >
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="Working">Working</MenuItem>
-            <MenuItem value="Working Remotely">Working Remotely</MenuItem>
-            <MenuItem value="On Vacation">On Vacation</MenuItem>
-            <MenuItem value="Business Trip">Business Trip</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
+      <StatusList
+        statuses={statuses}
+        filter={filter}
+        setFilter={setFilter}
+        search={search}
+        setSearch={setSearch}
+      />
 
-      <List>
-        {statuses
-          .filter((s) => s.status.includes(filter))
-          .filter((s) =>
-            s.username.toLowerCase().includes(search.toLowerCase())
-          )
-          .map((status, index) => (
-            <ListItem key={index}>
-              <div
-                style={{
-                  backgroundColor: getStatusColor(status.status),
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  marginRight: "10px",
-                }}
-              ></div>
-              <Typography>{`${status.username}: ${status.status}`}</Typography>
-            </ListItem>
-          ))}
-      </List>
       <Button variant="contained" color="warning" onClick={onLogout}>
         Logout
       </Button>
