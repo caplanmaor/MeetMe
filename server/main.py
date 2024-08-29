@@ -6,16 +6,14 @@ from typing import List
 from database import database, engine
 from models import metadata, status_table, user_table
 from fastapi.middleware.cors import CORSMiddleware
-import os
-import json
-import bcrypt
+import os, json, bcrypt
 from datetime import datetime, timedelta
 from seed import seed_database
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="../client/build/static"), name="static")
+app.mount("/static", StaticFiles(directory="client/build/static"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -164,4 +162,4 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @app.get("/{full_path:path}")
 async def serve_react_app(full_path: str):
-    return FileResponse("../client/build/index.html")
+    return FileResponse("client/build/index.html")

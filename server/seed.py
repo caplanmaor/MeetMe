@@ -32,10 +32,10 @@ async def seed_database():
 
     # hardcoded users and statuses as example data for testing
     example_users = [
-        {"username": "Jim Morrison", "password": "1234", "status": "Working"},
-        {"username": "Whitney Houston", "password": "1234", "status": "Working Remotely"},
-        {"username": "John Lennon", "password": "1234", "status": "On Vacation"},
-        {"username": "Mike Patton", "password": "1234", "status": "Business Trip"},
+        {"username": "Jim Morrison", "password": password, "status": "Working"},
+        {"username": "Whitney Houston", "password": password, "status": "Working Remotely"},
+        {"username": "John Lennon", "password": password, "status": "On Vacation"},
+        {"username": "Mike Patton", "password": password, "status": "Business Trip"},
     ]
 
     for user in example_users:
