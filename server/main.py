@@ -21,8 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# get secret key from env or generate a strong key
-SECRET_KEY = os.getenv('SECRET_KEY', os.urandom(32).hex())  # TODO: should be securely stored
+# get secret key from env or generate a key for local development
+SECRET_KEY = os.getenv('AUTH_SECRET_KEY', os.urandom(32).hex())
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

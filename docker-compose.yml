@@ -4,10 +4,13 @@ services:
     container_name: team_status_db
     environment:
       POSTGRES_USER: postgres
+      POSTGRES_HOST: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: team_status_db
-      SEED_USER: maor
+      SEED_USER_1: user1
+      SEED_USER_2: user2
       SEED_PASSWORD: 1234
+      AUTH_SECRET_KEY: 17135b004fd98688ad40a3bbc7a53cd1cd55a8e3ffd1bf700b17a2a1d3c9e456
     ports:
       - "5432:5432"
     volumes:
