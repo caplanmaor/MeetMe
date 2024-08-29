@@ -33,7 +33,6 @@ function App() {
   }, []);
 
   const handleLogin = (userData) => {
-    console.log("User data:", userData);
     setUsername(userData.user_name);
     setUserID(userData.user_id);
     setIsAuthenticated(true);
