@@ -10,7 +10,11 @@ import {
   InputLabel,
   Button,
 } from "@mui/material";
-import { fetchInitialStatuses, updateStatusInDB } from "./Requests";
+import {
+  fetchInitialStatuses,
+  updateStatusInDB,
+  setupWebSocket,
+} from "./Requests";
 import { getStatusColor } from "./Helpers";
 import "./Status.css";
 
@@ -22,9 +26,10 @@ const Status = ({ username, userID, onLogout }) => {
   const [userPrevStatus, setUserPrevStatus] = useState("Not Specified");
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token");
         const data = await fetchInitialStatuses(token);
         setStatuses(data);
 
@@ -42,13 +47,7 @@ const Status = ({ username, userID, onLogout }) => {
 
     fetchData();
 
-    const websocket = new WebSocket(
-      `ws://localhost:8000/ws?token=${localStorage.getItem("token")}`
-    );
-
-    websocket.onmessage = (event) => {
-      const newStatus = JSON.parse(event.data);
-
+    const websocket = setupWebSocket(token, (newStatus) => {
       setStatuses((prevStatuses) => {
         const filteredStatuses = prevStatuses.filter(
           (s) => s.user_id !== newStatus.user_id
@@ -57,7 +56,9 @@ const Status = ({ username, userID, onLogout }) => {
         updatedStatuses.sort((a, b) => a.username.localeCompare(b.username));
         return updatedStatuses;
       });
-    };
+    });
+
+    return () => websocket.close();
     // eslint-disable-next-line
   }, []);
 

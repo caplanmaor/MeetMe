@@ -32,3 +32,14 @@ export const updateStatusInDB = async (userID, status, token) => {
     throw new Error("Unauthorized access");
   }
 };
+
+export const setupWebSocket = (token, onMessage) => {
+  const websocket = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
+
+  websocket.onmessage = (event) => {
+    const newStatus = JSON.parse(event.data);
+    onMessage(newStatus);
+  };
+
+  return websocket;
+};
