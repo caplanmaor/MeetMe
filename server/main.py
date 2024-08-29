@@ -11,8 +11,11 @@ import json
 import bcrypt
 from datetime import datetime, timedelta
 from seed import seed_database
-app = FastAPI()
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
+app = FastAPI()
+app.mount("/static", StaticFiles(directory="../client/build/static"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -158,3 +161,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": user["username"], "user_id": user["id"]}, expires_delta=access_token_expires
     )
     return {"user_name": user["username"], "user_id": user["id"], "access_token": access_token, "token_type": "bearer"}
+
+@app.get("/{full_path:path}")
+async def serve_react_app(full_path: str):
+    return FileResponse("../client/build/index.html")
