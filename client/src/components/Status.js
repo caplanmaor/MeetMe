@@ -48,7 +48,10 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
 
     fetchInitialStatuses();
 
-    const websocket = new WebSocket("ws://localhost:8000/ws");
+    const websocket = new WebSocket(
+      `ws://localhost:8000/ws?token=${localStorage.getItem("token")}`
+    );
+
     websocket.onmessage = (event) => {
       const newStatus = JSON.parse(event.data);
 
@@ -61,12 +64,12 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
         return updatedStatuses;
       });
     };
-  }, []);
+  }, [userID, setIsAuthenticated]);
 
   const updateStatusInDB = async (status) => {
     const token = localStorage.getItem("token");
 
-    await fetch(
+    const response = await fetch(
       `http://localhost:8000/update_status/?user_id=${userID}&status=${status}`,
       {
         method: "POST",
@@ -76,6 +79,11 @@ const Status = ({ username, userID, setIsAuthenticated }) => {
         },
       }
     );
+    if (response.status === 401) {
+      console.error("Unauthorized access");
+      localStorage.removeItem("token");
+      setIsAuthenticated(false);
+    }
     setUserPrevStatus(status);
   };
 

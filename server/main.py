@@ -64,7 +64,7 @@ async def get_current_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="t
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
-        if username is None:
+        if not username:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
@@ -83,17 +83,27 @@ async def get_initial_statuses(current_user: dict = Depends(get_current_user)):
     initial_statuses = await database.fetch_all(query)
     return [{"user_id": status["user_id"], "status": status["status"], "username": status["username"]} for status in initial_statuses]
 
-
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    await manager.connect(websocket)
-    
     try:
+        # get token from the query parameters
+        token = websocket.query_params.get("token")
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token missing"
+            )
+
+        # validate token (throw exception if invalid)
+        current_user = await get_current_user(token=token)
+        await manager.connect(websocket)
         while True:
             data = await websocket.receive_text()
             await manager.broadcast(data)
-    except WebSocketDisconnect:
+    except Exception as e:
+        print(f"Error: {e}")
         manager.disconnect(websocket)
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
 
 @app.post("/update_status/")
 async def update_status(user_id: int, status: str, current_user: dict = Depends(get_current_user)):
@@ -143,6 +153,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # in the JWT standard "sub" is a registered claim that stands for "subject"
     access_token = create_access_token(
         data={"sub": user["username"], "user_id": user["id"]}, expires_delta=access_token_expires
     )
